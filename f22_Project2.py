@@ -4,6 +4,7 @@ import re
 import os
 import csv
 import unittest
+import requests
 
 
 def get_listings_from_search_results(html_file):
@@ -25,6 +26,20 @@ def get_listings_from_search_results(html_file):
         ('Loft in Mission District', 210, '1944564'),  # example
     ]
     """
+    list1 = []
+    list2 = []
+    soup = BeautifulSoup(html_file, 'html.parser')
+
+    titles = soup.find_all("div", class_="t1jojoys") 
+
+    #find the ID number using regex from url 
+    url = soup.find_all("a", "href")
+    reg_ex = r'rooms\/(/d+)\/'
+    id_nums = int(re.findall(reg_ex, url))
+   
+    #use find_all tag to find the price
+
+
     pass
 
 
@@ -94,6 +109,10 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
+    with open(filename, 'w', newLine = '') as f:
+        w = csv.writer(f)
+        
+
     pass
 
 
