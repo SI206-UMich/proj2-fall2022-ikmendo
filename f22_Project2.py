@@ -32,17 +32,13 @@ def get_listings_from_search_results(html_file):
     soup = BeautifulSoup(file_info, 'html.parser')
 
     titles = soup.find_all("div", class_="t1jojoys") 
-
-    #find the ID number using regex from url 
-    link_list = soup.find_all("a", class_="ln2bl2p dir dir-ltr")  #text 
-   
-    #use find_all tag to find the price
-    price_block = soup.find_all("div", class_="_1jo4hgw") #list of price blocks
+    link_list = soup.find_all("a", class_="ln2bl2p dir dir-ltr")
+    price_block = soup.find_all("div", class_="_1jo4hgw") 
 
     for i in range(len(link_list)):
         #titles
         title = titles[i].text
-        #info_list.append(item1, item2, item3)
+        
         #price
         price_span = price_block[i].find_all("span", class_='_tyxjp1')
         price = (price_span[0].text).strip('$')
@@ -55,6 +51,7 @@ def get_listings_from_search_results(html_file):
         id_nums_list = re.findall(reg_ex, url)
         id_num = id_nums_list[0] 
 
+        #add to tuple 
         temp = (title, new_price, id_num)
         info_list.append(temp)
 
@@ -89,7 +86,51 @@ def get_listing_information(listing_id):
         number of bedrooms
     )
     """
-    pass
+    file = "html_files/listing_" + listing_id + ".html"
+    with open(file, 'r') as f:
+        file_info = f.read()
+    soup = BeautifulSoup(file_info, 'html.parser')
+
+    #policy number
+    policy = soup.find_all("li", class_="f19phm7j dir dir-ltr")
+    reg_ex1 = r'[Pp]ending'
+    reg_ex2 = r'[Nn]ot [Nn]eeded'
+    reg_ex3 = r'[Ee]xempt'
+    
+    if re.findall(reg_ex1, policy[0].text):
+        policy_number = "Pending"
+
+    elif re.findall(reg_ex2, policy[0].text) or re.findall(reg_ex3, policy[0].text):
+        policy_number = "Exempt"
+    
+    else: 
+        policy_number = (policy[0].text).strip("Policy number: ")
+        
+    #room info    
+    room_info_list = soup.find_all("h2", class_="_14i3z6h")
+    private_regex = r'[Pp]rivate'
+    shared_regex = r'[Ss]hared'
+
+    if re.findall(private_regex, room_info_list[0].text):
+        room_info = "Private Room"
+    
+    elif re.findall(shared_regex, room_info_list[0].text):
+        room_info = "Shared Room"
+    
+    else:
+        room_info = "Entire Room"   
+
+    #number of rooms     
+    num_rooms_list = soup.find_all("li", class_="l7n4lsf dir dir-ltr")
+    room_regex = r'(\d{1}) bedroom'
+
+    num_rooms = re.findall(room_regex, num_rooms_list[1].text)
+    rooms = num_rooms[0]
+
+    listing_tuple = (policy_number, room_info, rooms)
+    return listing_tuple
+    
+
 
 
 def get_detailed_listing_database(html_file):
