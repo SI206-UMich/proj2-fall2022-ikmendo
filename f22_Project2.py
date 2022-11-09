@@ -26,21 +26,43 @@ def get_listings_from_search_results(html_file):
         ('Loft in Mission District', 210, '1944564'),  # example
     ]
     """
-    list1 = []
-    list2 = []
-    soup = BeautifulSoup(html_file, 'html.parser')
+    info_list = []
+    with open(html_file, 'r') as f:
+        file_info = f.read()
+    soup = BeautifulSoup(file_info, 'html.parser')
 
     titles = soup.find_all("div", class_="t1jojoys") 
 
     #find the ID number using regex from url 
-    url = soup.find_all("a", "href")
-    reg_ex = r'rooms\/(/d+)\/'
-    id_nums = int(re.findall(reg_ex, url))
+    link_list = soup.find_all("a", class_="ln2bl2p dir dir-ltr")  #text 
    
     #use find_all tag to find the price
+    price_block = soup.find_all("div", class_="_1jo4hgw") #list of price blocks
+
+    for i in range(len(link_list)):
+        #titles
+        title = titles[i].text
+        #info_list.append(item1, item2, item3)
+        #price
+        price_span = price_block[i].find_all("span", class_='_tyxjp1')
+        price = (price_span[0].text).strip('$')
+        new_price = int(price)
 
 
-    pass
+        #id numbers
+        url = link_list[i]["href"] 
+        reg_ex = r'rooms\/(\d+)\?'
+        id_nums_list = re.findall(reg_ex, url)
+        id_num = id_nums_list[0] 
+
+        temp = (title, new_price, id_num)
+        info_list.append(temp)
+
+    return info_list
+
+
+
+    
 
 
 def get_listing_information(listing_id):
@@ -109,8 +131,8 @@ def write_csv(data, filename):
 
     This function should not return anything.
     """
-    with open(filename, 'w', newLine = '') as f:
-        w = csv.writer(f)
+    with open(filename, 'w', newline = '') as f:
+       w = csv.writer(f)
         
 
     pass
